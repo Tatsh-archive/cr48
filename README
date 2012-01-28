@@ -1,3 +1,116 @@
-Google's protype netbook codenamed: cr48
+This is stuff to make Gentoo work with the Google CR48.
 
-a place to keep all my required files/patches running Arch Linux
+1. You need to flash the BIOS with a normal BIOS. Google that (yes you have to
+take it apart).
+
+2. Install Gentoo as normal. You can choose x86 or x86_64. Both work in full. Use
+the kernel configuration here for x86_64.
+
+My recommendation is to create a blank image:
+$ dd if=/dev/zero of=file_16gb bs=14M count=1024
+(or whatever you think is best)
+
+Then format it (probably need root):
+# fdisk file_16gb (and responses to fdisk)
+n
+p
+1
+w
+x
+# mkfs.ext3 file_16gb
+
+Now mount and install Gentoo as if this is the step where you get into the chroot.
+# mkdir /mnt/cr48
+# mount file_16gb /mnt/cr48
+
+See scripts/mount-file_16gb !
+
+3. When you are done building everything and everything looks okay, and this means
+kernel and kernel modules too, get the Sysresccd and put it onto a flash drive:
+http://www.sysresccd.org/Sysresccd-manual-en_How_to_install_SystemRescueCd_on_an_USB-stick
+
+4. Unmount the cr48 image!
+
+5. Boot the CR48 with the flash drive. Kernel does not really matter as all we are doing
+is copying the image from your machine.
+
+6. In the Sysresccd environment:
+   a) Setup wireless either by stopping NetworkMangaer (/etc/init.d/NetworkMangaer stop) or
+   running one of the options for X and setting up Wifi with NetworkMangaer within X.
+   b) # passwd
+      Get the IP
+      # ifconfig
+      Find the correct hard disk name, on my it is /dev/sda1 because I have the
+      BIOS set to AHCI.
+      # fdisk -l (find the correct
+
+7. On your machine, begin copying the image (fix the file names):
+# dd if=file_16gb | ssh root@THE_IP 'dd of=/dev/sda1'
+
+8. Wait!
+
+9. Reboot the machine without the flash drive.
+
+10. Hope it works.
+
+Getting the GPS and Modem (for use with Verizon) to work:
+The kernel must be patched first:
+
+# cd /usr/src/linux
+Find qcserial.c:
+# find . -name qcserial.c
+# vi path-to/qcserial.c
+
+Add these lines to the device list:
+{USB_DEVICE(0x1410, 0xa010)},	/* Novatel Gobi QDL device */
+{USB_DEVICE(0x1410, 0xa011)},	/* Novatel Gobi QDL device */
+{USB_DEVICE(0x1410, 0xa012)},	/* Novatel Gobi QDL device */
+{USB_DEVICE(0x1410, 0xa013)},	/* Novatel Gobi QDL device */
+{USB_DEVICE(0x1410, 0xa014)},	/* Novatel Gobi QDL device */
+
+# make && make modules_install
+
+Install the kernel as you normally would. Make sure it works. If you built
+qcserial as a module, make sure it's listed in /etc/conf.d/modules.
+
+The firmware directory has files you need. Get the tarball onto your root
+however you like.
+
+In your root:
+# cp Qualcomm.tar.gz /opt
+# cd /opt
+# tar xvf Qualcomm.tar.gz
+# rm Qualcomm.tar.gz
+
+The etc directory has the udev rules to load the Gobi. Simply copy them where
+they belong.
+
+There are 2 modules you need to add (and you must have CONFIG_USB_SERIAL=y for
+them to work):
+
+# cd modules
+# cd Qualcomm/QCSerial2k
+# make && make install
+# cd ../QCUSBNet
+# make && make install
+
+Now add them to /etc/conf.d/modules like so:
+modules="${modules} QCSerial2k QCUSBNet2k"
+
+Reboot and it should start detecting these devices.
+
+To get Verizon to work, setup NetworkManager and make sure you can see Mobile
+Broadband as an option.
+
+Put the firmware onto your device (you need to do this on each reboot, unsleep,
+etc). See scripts/startthereg.sh. Run it as root.
+
+Set up NetworkManager:
+1. Add new connection under the Mobile Broadband tab.
+2. Choose United States.
+3. Choose Verizon.
+4. Phone number #777, user name a, password a.
+5. Click OK.
+6. Make it connect.
+
+It should work now. It's not fast and I do not know how long it lasts for.
