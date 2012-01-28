@@ -16,6 +16,7 @@ clean:
 	@rm -f *~
 
 install:
+	mkdir -p $(KDIR)/kernel/drivers/usb/serial/
 	cp QCSerial2k.ko $(KDIR)/kernel/drivers/usb/serial/
 	depmod -a
 

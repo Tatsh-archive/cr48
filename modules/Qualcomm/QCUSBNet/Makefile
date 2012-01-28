@@ -17,6 +17,7 @@ clean:
 	@rm -f *~
 
 install:
+	mkdir -p $(KDIR)/kernel/drivers/net/usb/
 	cp QCUSBNet2k.ko $(KDIR)/kernel/drivers/net/usb/
 	depmod -a
 
