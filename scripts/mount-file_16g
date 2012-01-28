@@ -1,0 +1,17 @@
+#!/bin/sh
+
+MOUNTPOINT="/mnt/cr48"
+
+umount -l /mnt/cr48
+mount -t ext3 file_16g /mnt/cr48 -o rw
+mount -o bind /dev /mnt/cr48/dev
+mount -o bind /dev/pts /mnt/cr48/dev/pts
+mount -o bind /dev/shm /mnt/cr48/dev/shm
+mount -t proc none /mnt/cr48/proc
+mount -o bind /sys /mnt/cr48/sys
+mount -o bind /tmp /mnt/cr48/tmp
+mount -o bind /usr/portage /mnt/cr48/usr/portage
+mount -o bind /home/tatsh/dev/cr48/src /mnt/cr48/usr/src
+mount -o bind /home/tatsh/dev/cr48/portage-tmp /mnt/cr48/var/tmp/portage
+
+linux64 chroot /mnt/cr48 /bin/bash
