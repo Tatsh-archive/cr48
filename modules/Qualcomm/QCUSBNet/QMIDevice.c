@@ -115,6 +115,7 @@ POSSIBILITY OF SUCH DAMAGE.
 // Include Files
 //---------------------------------------------------------------------------
 #include <linux/sched.h>
+#include <linux/module.h>
 
 #include "QMIDevice.h"
 
@@ -2100,8 +2101,7 @@ RETURN VALUE:
    int - 0 for success
          Negative errno for failure
 ===========================================================================*/
-int UserspaceIOCTL( 
-   struct inode *    pUnusedInode, 
+long UserspaceIOCTL( 
    struct file *     pFilp,
    unsigned int      cmd, 
    unsigned long     arg )
@@ -2241,7 +2241,7 @@ int UserspaceClose(
    }
 
    // Fallthough.  If f_count == 1 no need to do more checks
-   if (atomic_read( &pFilp->f_count ) != 1)
+   if (atomic_long_read( &pFilp->f_count ) != 1)
    {
       // "group_leader" points to the main process' task, which resides in
       // the global "tasks" list.

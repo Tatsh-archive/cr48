@@ -80,6 +80,7 @@ POSSIBILITY OF SUCH DAMAGE.
 // Include Files
 //---------------------------------------------------------------------------
 #include <linux/ctype.h>
+#include <linux/module.h>
 
 #include "Structs.h"
 #include "QMIDevice.h"
