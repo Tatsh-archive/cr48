@@ -71,6 +71,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include <linux/tty.h>
 #include <linux/tty_flip.h>
+#include <linux/module.h>
 #include <linux/usb.h> 
 #include <linux/usb/serial.h>
 #include <linux/version.h>
@@ -500,7 +501,7 @@ static int __init QCInit( void )
    gQCDevice.num_ports = NUM_BULK_EPS;
 
    // Registering driver to USB serial core layer 
-   nRetval = usb_serial_register( &gQCDevice );
+   nRetval = usb_serial_bus_register( &gQCDevice );
    if (nRetval != 0)
    {
       return nRetval;
@@ -510,7 +511,7 @@ static int __init QCInit( void )
    nRetval = usb_register( &QCDriver );
    if (nRetval != 0) 
    {
-      usb_serial_deregister( &gQCDevice );
+      usb_serial_bus_deregister( &gQCDevice );
       return nRetval;
    }
 
@@ -534,7 +535,7 @@ RETURN VALUE:
 static void __exit QCExit( void )
 {
    usb_deregister( &QCDriver );
-   usb_serial_deregister( &gQCDevice );
+   usb_serial_bus_deregister( &gQCDevice );
 }
 
 // Calling kernel module to init our driver
